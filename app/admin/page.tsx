@@ -1,8 +1,6 @@
 import React from 'react'
 import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server';
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
 import {
     Table,
     TableBody,
@@ -13,6 +11,7 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import AddRoomForm from './AddRoomForm'
+import DeleteRoomButton from './DeleteRoomButton'
 
 
 
@@ -23,24 +22,21 @@ export default async function AdminPage() {
     return (
         <div>
             <AddRoomForm />
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>Room Id</TableHead>
-                        <TableHead>Room Name</TableHead>
-                    </TableRow>
+            <div className='flex flex-col gap-4'>
+                <div>
+                    <p>Room Id</p>
+                    <p>Room Name</p>
+                </div>
 
-                </TableHeader>
-                <TableBody>
-                    {rooms?.map((room) => (
-                        <TableRow key={room.id}>
-                            <TableCell>{room.id}</TableCell>
-                            <TableCell>{room.name}</TableCell>
-                        </TableRow>
-                    ))}
+                {rooms?.map((room) => (
+                    <div key={room.id}>
+                        <p>{room.id}</p>
+                        <p>{room.name}</p>
+                        <DeleteRoomButton roomId={room.id} />
+                    </div>
+                ))}
+            </div>
 
-                </TableBody>
-            </Table>
         </div>
     )
 }
