@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table"
 import AddRoomForm from './AddRoomForm'
 import DeleteRoomButton from './DeleteRoomButton'
-
+import EditableRoomName from './EditableRoomName';
 
 
 
@@ -23,16 +23,17 @@ export default async function AdminPage() {
         <div className='flex flex-col min-w-screen'>
             <AddRoomForm />
             <div className='flex flex-col gap-4 min-w-full'>
-                <div className='flex flex-row min-w-full justify-between'>
+                <div className='flex flex-row min-w-full justify-between border p-2 items-center min-h-[50px] rounded-lg'>
                     <p className='w-[30%] text-center'>Room Id</p>
                     <p className='w-[30%] text-center'>Room Name</p>
                     <p className='w-[300px] text-center'>Actions Name</p>
                 </div>
 
                 {rooms?.map((room) => (
-                    <div className='flex flex-row min-w-full justify-between' key={room.id}>
+                    <div className='flex flex-row min-w-full justify-between border p-2 align-middle items-center rounded-lg min-h-[50px]' key={room.id}>
                         <p className='w-[30%] text-center'>{room.id}</p>
-                        <p className='w-[30%] text-center'>{room.name}</p>
+                        {/* <p className='w-[30%] text-center'>{room.name}</p> */}
+                        <EditableRoomName roomId={room.id} initialName={room.name} />
                         <div className='w-[300px] text-center'><DeleteRoomButton roomId={room.id} /></div>
                     </div>
                 ))}

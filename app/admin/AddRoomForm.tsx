@@ -29,11 +29,12 @@ export default function AddRoomForm({ onRoomAdded }: { onRoomAdded?: () => void 
     return (
         <div className='flex flex-row gap-2 mb-10'>
             <Input
+                className="rounded-lg"
                 placeholder='Room Name'
                 value={name}
                 onChange={e => setName(e.target.value)}
             />
-            <Button onClick={handleAddRoom} disabled={isLoading || !name}>
+            <Button className="rounded-lg" onClick={handleAddRoom} disabled={isLoading || !name}>
                 {isLoading ? "Adding..." : "Add Room"}
             </Button>
         </div>
