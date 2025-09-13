@@ -4,14 +4,12 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { createClient } from "@supabase/supabase-js";
 
 
 
 export default function SigninPage() {
 
     const supabase = createClientComponentClient();
-    // const supabase = createClient(cookies)
     const router = useRouter();
 
     const [email, setEmail] = useState('');
