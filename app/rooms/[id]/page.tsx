@@ -10,31 +10,37 @@ export default function RoomPage({ params }: { params: { id: string } }) {
     const { id } = params;
     const [events, setEvents] = useState<any[]>([]);
 
-    function handleDateSelect(selectInfo: any) {
-        let title = prompt("Enter booking title:");
-        let calendarApi = selectInfo.view.calendar;
-        calendarApi.unselect(); // clear highlight
+    async function handleDateSelect(selectInfo: any) {
+        const title = prompt("Enter booking title (optional):");
+        const calendarApi = selectInfo.view.calendar;
+        calendarApi.unselect();
 
-        if (title) {
-            const newEvent = {
-                id: String(Date.now()),
-                title,
-                start: selectInfo.startStr,
-                end: selectInfo.endStr,
-                allDay: selectInfo.allDay,
-            };
+        const newEvent = {
+            id: String(Date.now()),
+            title: title || "Booking",
+            start: selectInfo.startStr,
+            end: selectInfo.endStr,
+            allDay: selectInfo.allDay,
+        };
 
-            setEvents([...events, newEvent]);
+        setEvents([...events, newEvent]);
 
-            // TODO: Save to Supabase
-            fetch(`/api/bookings`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ roomId: id, ...newEvent }),
-            });
-        }
+        // save to Supabase
+        const res = await fetch("/api/bookings", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                roomId: id,
+                start: newEvent.start,
+                end: newEvent.end,
+                status: "pending",
+                // optionally, userId if you have auth
+            }),
+        });
+
+        const data = await res.json();
+        if (data.error) alert("Error saving booking: " + data.error);
     }
-
     return (
         <div className="p-4">
             <h1 className="text-xl font-bold mb-4">Room {id} - Booking Calendar</h1>

@@ -31,8 +31,8 @@ export default async function AdminPage() {
                 </div>
 
                 {rooms?.map((room) => (
-                    <Link href={'/rooms/' + room.id}>
-                        <div className='flex flex-row min-w-full justify-between border p-2 align-middle items-center rounded-lg min-h-[50px]' key={room.id}>
+                    <Link href={'/rooms/' + room.id} key={room.id}>
+                        <div className='flex flex-row min-w-full justify-between border p-2 align-middle items-center rounded-lg min-h-[50px]' >
                             <p className='w-[30%] text-center'>{room.id}</p>
                             <EditableRoomName roomId={room.id} initialName={room.name} />
                             <div className='w-[300px] text-center'><DeleteRoomButton roomId={room.id} /></div>
