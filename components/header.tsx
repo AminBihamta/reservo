@@ -3,7 +3,6 @@ import React from 'react'
 import Image from 'next/image'
 import LogoutButton from './signout'
 import { usePathname } from 'next/navigation';
-import path from 'path';
 
 function header() {
     const pathname = usePathname();
