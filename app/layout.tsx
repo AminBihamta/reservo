@@ -29,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <Header />
-      <body className={`${geistSans.className} antialiased p-10`}>
+      <body className={`${geistSans.className} antialiased p-10 h-screen`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
