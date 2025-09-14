@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
 
+// POST = create booking
 export async function POST(request: Request) {
   const supabase = createClient(cookies());
   const data = await request.json();
@@ -23,4 +24,26 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json({ success: true });
+}
+
+// GET = fetch bookings for a room
+export async function GET(request: Request) {
+  const supabase = createClient(cookies());
+  const { searchParams } = new URL(request.url);
+  const roomId = searchParams.get("roomId");
+
+  if (!roomId) {
+    return NextResponse.json({ error: "Missing roomId" }, { status: 400 });
+  }
+
+  const { data, error } = await supabase
+    .from("bookings")
+    .select("*")
+    .eq("room_id", roomId);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json(data); // ✅ always JSON
 }

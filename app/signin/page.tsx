@@ -57,7 +57,6 @@ export default function SigninPage() {
                     <div className="bg-neutral-500 h-[1px] w-full "></div>
                     <span className="w-full text-center ml-[-30px] mr-[-30px]">or</span>
                     <div className="bg-neutral-500 h-[1px] w-full "></div>
-
                 </div>
                 <Button variant="outline" onClick={() => router.push('/signup')}>Create an Account</Button>
             </div>

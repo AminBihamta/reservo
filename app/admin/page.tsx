@@ -38,12 +38,13 @@ export default async function AdminPage() {
                             <p className='w-[30%] text-center'>{room.id}</p>
                             <EditableRoomName roomId={room.id} initialName={room.name} />
                             <div className='w-[300px] text-center flex flex-row  gap-2 justify-end'>
-                                <DeleteRoomButton roomId={room.id} />
+
                                 <Link href={'/rooms/' + room.id}>
                                     <Button className="bg-neutral-900 border border-neutral-300 p-[10px] hover:bg-neutral-800">
                                         <Image className="fill-red-200" src="/view-icon.svg" width={18} height={25} alt={""} />
                                     </Button>
                                 </Link>
+                                <DeleteRoomButton roomId={room.id} />
                             </div>
                         </div>
                     </div>
