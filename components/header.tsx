@@ -1,7 +1,7 @@
 "use client";
 import React from 'react'
 import Image from 'next/image'
-import LogoutButton from './signout'
+import { LogoutButton } from './logout-button'
 import { usePathname } from 'next/navigation';
 
 function header() {

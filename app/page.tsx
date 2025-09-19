@@ -16,7 +16,7 @@ export default async function UserPage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/signin');
+    redirect('/auth/login');
   }
 
   const { data: rooms } = await supabase.from("rooms").select();

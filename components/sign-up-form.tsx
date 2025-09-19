@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import Image from "next/image";
 
 export function SignUpForm({
   className,
@@ -58,10 +59,13 @@ export function SignUpForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
+      <Card className="p-8">
         <CardHeader>
-          <CardTitle className="text-2xl">Sign up</CardTitle>
-          <CardDescription>Create a new account</CardDescription>
+          <div className="flex flex-row justify-center w-full gap-5 mb-4 ">
+            <Image src="/reservo-logo.svg" width={150} height={150} alt="Reservo Logo" />
+            <span>|</span>
+            <h2 className="font-semibold">Sign Up</h2>
+          </div>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignUp}>
