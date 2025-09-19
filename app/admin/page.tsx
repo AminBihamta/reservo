@@ -1,15 +1,6 @@
 import React from 'react'
 import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server';
-import {
-    Table,
-    TableBody,
-    TableCaption,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table"
 import AddRoomForm from './AddRoomForm'
 import DeleteRoomButton from './DeleteRoomButton'
 import EditableRoomName from './EditableRoomName';
