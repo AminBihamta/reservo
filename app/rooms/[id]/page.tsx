@@ -13,5 +13,10 @@ export default async function RoomPage({ params }: { params: { id: string } }) {
         redirect("/signin");
     }
 
-    return <RoomCalendar roomId={params.id} userId={user.id} />;
+    // fetch room to get its name
+    const { data: roomData, error: roomError } = await supabase.from("rooms").select("id, name").eq("id", params.id).single();
+
+    const roomName = roomData?.name ?? params.id;
+
+    return <RoomCalendar roomId={params.id} userId={user.id} roomName={roomName} />;
 }

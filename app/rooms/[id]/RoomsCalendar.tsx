@@ -8,9 +8,16 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 
-export default function RoomCalendar({ roomId, userId }: { roomId: string; userId: string }) {
+export default function RoomCalendar({ roomName, roomId, userId }: { roomId: string; userId: string; roomName: string }) {
     const supabase = createClient();
     const [events, setEvents] = useState<any[]>([]);
+
+    // force calendar to refresh "now" periodically so the now-indicator moves
+    const [now, setNow] = useState(() => new Date().toISOString());
+    useEffect(() => {
+        const t = setInterval(() => setNow(new Date().toISOString()), 60_000); // update every minute
+        return () => clearInterval(t);
+    }, []);
 
     const [selectedBooking, setSelectedBooking] = useState<any | null>(null);
     const [showModal, setShowModal] = useState(false);
@@ -55,6 +62,7 @@ export default function RoomCalendar({ roomId, userId }: { roomId: string; userI
                         status: b.status,
                         userId: b.user_id,
                         userName: profilesMap[String(b.user_id)]?.full_name || profilesMap[String(b.user_id)]?.email || null,
+                        roomName: roomName,
                         raw: b,
                     },
                 }));
@@ -86,6 +94,7 @@ export default function RoomCalendar({ roomId, userId }: { roomId: string; userI
                 status: "pending",
                 userId: userId || null,
                 userName: null,
+                roomName: roomName,
             },
         };
 
@@ -145,10 +154,13 @@ export default function RoomCalendar({ roomId, userId }: { roomId: string; userI
 
     return (
         <div className="p-4">
-            <h1 className="text-xl font-bold mb-4">Room {roomId} - Booking Calendar</h1>
+            <h1 className="text-xl font-bold mb-4">{roomName}</h1>
             <FullCalendar
                 plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
                 initialView="timeGridWeek"
+                now={now}
+                nowIndicator={true}
+                key={now} // force re-render so the indicator updates
                 selectable={true}
                 select={handleDateSelect}
                 eventClick={handleEventClick}
@@ -164,6 +176,7 @@ export default function RoomCalendar({ roomId, userId }: { roomId: string; userI
                         <p className="mb-1"><strong>Start:</strong> {new Date(selectedBooking.start).toLocaleString()}</p>
                         <p className="mb-1"><strong>End:</strong> {new Date(selectedBooking.end).toLocaleString()}</p>
                         {selectedBooking.status && <p className="mb-1"><strong>Status:</strong> {selectedBooking.status}</p>}
+                        {selectedBooking.extendedProps?.roomName && <p className="mb-1"><strong>Room:</strong> {selectedBooking.extendedProps.roomName}</p>}
                         {selectedBooking.userName && <p className="mb-1"><strong>User:</strong> {selectedBooking.userName}</p>}
                         {selectedBooking.userId && <p className="mb-3 text-sm text-gray-300"><strong>User ID:</strong> {selectedBooking.userId}</p>}
 
