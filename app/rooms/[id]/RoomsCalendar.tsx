@@ -4,13 +4,50 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
-import { useState, useEffect } from "react";
+import type { DateSelectArg, EventClickArg, EventInput } from "@fullcalendar/core";
+import { useState, useEffect, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
+
+type BookingRow = {
+    id: string | number;
+    user_id: string | null;
+    start_time: string;
+    end_time: string;
+    status: string | null;
+};
+
+type ProfileRow = {
+    id: string;
+    full_name: string | null;
+    email: string | null;
+};
+
+type BookingExtendedProps = {
+    status: string | null;
+    userId: string | null;
+    userName: string | null;
+    roomName: string;
+    raw: BookingRow;
+};
+
+type CalendarEvent = EventInput & {
+    extendedProps: BookingExtendedProps;
+};
+
+type SelectedBooking = {
+    id: string;
+    title?: string;
+    start: string;
+    end: string;
+    status?: string | null;
+    userId?: string | null;
+    userName?: string | null;
+    extendedProps?: BookingExtendedProps;
+};
 
 export default function RoomCalendar({ roomName, roomId, userId }: { roomId: string; userId: string; roomName: string }) {
-    const supabase = createClient();
-    const [events, setEvents] = useState<any[]>([]);
+    const supabase = useMemo(() => createClient(), []);
+    const [events, setEvents] = useState<CalendarEvent[]>([]);
 
     // force calendar to refresh "now" periodically so the now-indicator moves
     const [now, setNow] = useState(() => new Date().toISOString());
@@ -19,7 +56,7 @@ export default function RoomCalendar({ roomName, roomId, userId }: { roomId: str
         return () => clearInterval(t);
     }, []);
 
-    const [selectedBooking, setSelectedBooking] = useState<any | null>(null);
+    const [selectedBooking, setSelectedBooking] = useState<SelectedBooking | null>(null);
     const [showModal, setShowModal] = useState(false);
 
     // Fetch existing bookings for this room and map them into FullCalendar events
@@ -37,22 +74,29 @@ export default function RoomCalendar({ roomName, roomId, userId }: { roomId: str
                     return;
                 }
 
-                const data = await res.json();
+                const data = (await res.json()) as BookingRow[];
 
                 if (!mounted) return;
 
                 // attach user info by querying profiles for all unique user_ids
-                const userIds = Array.from(new Set((data || []).map((b: any) => b.user_id).filter(Boolean)));
+                const userIds = Array.from(
+                    new Set(
+                        (data || [])
+                            .map((b) => b.user_id)
+                            .filter((id): id is string => Boolean(id))
+                    )
+                );
 
-                let profilesMap: Record<string, any> = {};
+                const profilesMap: Record<string, ProfileRow> = {};
                 if (userIds.length > 0) {
-                    const { data: profiles } = await supabase.from("profiles").select("id, full_name, email").in("id", userIds as any[]);
-                    (profiles || []).forEach((p: any) => {
-                        profilesMap[String(p.id)] = p;
+                    const { data: profiles } = await supabase.from("profiles").select("id, full_name, email").in("id", userIds);
+                    (profiles || []).forEach((p) => {
+                        const profile = p as ProfileRow;
+                        profilesMap[String(profile.id)] = profile;
                     });
                 }
 
-                const mapped = (data || []).map((b: any) => ({
+                const mapped: CalendarEvent[] = (data || []).map((b) => ({
                     id: String(b.id),
                     title: b.status ? (b.status === "pending" ? "Pending" : "Booked") : "Booking",
                     start: b.start_time,
@@ -62,7 +106,7 @@ export default function RoomCalendar({ roomName, roomId, userId }: { roomId: str
                         status: b.status,
                         userId: b.user_id,
                         userName: profilesMap[String(b.user_id)]?.full_name || profilesMap[String(b.user_id)]?.email || null,
-                        roomName: roomName,
+                        roomName,
                         raw: b,
                     },
                 }));
@@ -78,14 +122,15 @@ export default function RoomCalendar({ roomName, roomId, userId }: { roomId: str
         return () => {
             mounted = false;
         };
-    }, [roomId]);
+    }, [roomId, roomName, supabase]);
 
-    async function handleDateSelect(selectInfo: any) {
+    async function handleDateSelect(selectInfo: DateSelectArg) {
         const calendarApi = selectInfo.view.calendar;
         calendarApi.unselect();
 
-        const newEvent: any = {
-            id: String(Date.now()),
+        const newEventId = String(Date.now());
+        const newEvent: CalendarEvent = {
+            id: newEventId,
             title: "Pending",
             start: selectInfo.startStr,
             end: selectInfo.endStr,
@@ -94,7 +139,14 @@ export default function RoomCalendar({ roomName, roomId, userId }: { roomId: str
                 status: "pending",
                 userId: userId || null,
                 userName: null,
-                roomName: roomName,
+                roomName,
+                raw: {
+                    id: newEventId,
+                    user_id: userId || null,
+                    start_time: selectInfo.startStr,
+                    end_time: selectInfo.endStr,
+                    status: "pending",
+                },
             },
         };
 
@@ -107,7 +159,7 @@ export default function RoomCalendar({ roomName, roomId, userId }: { roomId: str
                 } else {
                     newEvent.extendedProps.userName = "You";
                 }
-            } catch (e) {
+            } catch {
                 newEvent.extendedProps.userName = "You";
             }
         } else {
@@ -133,15 +185,20 @@ export default function RoomCalendar({ roomName, roomId, userId }: { roomId: str
         }
     }
 
-    function handleEventClick(clickInfo: any) {
+    function handleEventClick(clickInfo: EventClickArg) {
         const ev = clickInfo.event;
-        const payload = {
+        const start = ev.startStr || (ev.start ? ev.start.toISOString() : "");
+        const end = ev.endStr || (ev.end ? ev.end.toISOString() : "");
+        const extendedProps = (ev.extendedProps || {}) as BookingExtendedProps;
+        const payload: SelectedBooking = {
             id: ev.id,
-
             title: ev.title,
-            start: ev.startStr ?? ev.start?.toISOString(),
-            end: ev.endStr ?? ev.end?.toISOString(),
-            ...(ev.extendedProps || {}),
+            start,
+            end,
+            status: extendedProps.status ?? null,
+            userId: extendedProps.userId ?? null,
+            userName: extendedProps.userName ?? null,
+            extendedProps,
         };
         setSelectedBooking(payload);
         setShowModal(true);

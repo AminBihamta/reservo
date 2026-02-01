@@ -12,7 +12,7 @@ export default function DeleteRoomButton({ roomId }: { roomId: string }) {
     async function handleDeleteRoom() {
         setLoading(true);
 
-        const res = await fetch('/api/rooms/' + roomId, {
+        await fetch('/api/rooms/' + roomId, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'

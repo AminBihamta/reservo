@@ -3,7 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import RoomCalendar from "./RoomsCalendar"; // 👈 client component
 
-export default async function RoomPage({ params }: { params: { id: string } }) {
+export default async function RoomPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
     const supabase = createClient(cookies());
     const {
         data: { user },
@@ -14,9 +15,9 @@ export default async function RoomPage({ params }: { params: { id: string } }) {
     }
 
     // fetch room to get its name
-    const { data: roomData, error: roomError } = await supabase.from("rooms").select("id, name").eq("id", params.id).single();
+    const { data: roomData } = await supabase.from("rooms").select("id, name").eq("id", id).single();
 
-    const roomName = roomData?.name ?? params.id;
+    const roomName = roomData?.name ?? id;
 
-    return <RoomCalendar roomId={params.id} userId={user.id} roomName={roomName} />;
+    return <RoomCalendar roomId={id} userId={user.id} roomName={roomName} />;
 }

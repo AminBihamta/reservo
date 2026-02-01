@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 
-export default function AddRoomForm({ onRoomAdded }: { onRoomAdded?: () => void }) {
+export default function AddRoomForm() {
     const [name, setName] = useState("");
     const [isLoading, setLoading] = useState(false);
     const router = useRouter();
@@ -12,7 +12,7 @@ export default function AddRoomForm({ onRoomAdded }: { onRoomAdded?: () => void 
     async function handleAddRoom() {
         setLoading(true);
 
-        const res = await fetch("/api/rooms", {
+        await fetch("/api/rooms", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
